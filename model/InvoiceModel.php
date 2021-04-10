@@ -40,14 +40,12 @@ class InvoiceModel
 	{
 		try {
 			$this->open_db();
-			$query = $this->condb->prepare("INSERT INTO invoices (category,name) VALUES (?, ?)");
-			$query->bind_param("ss", $obj->category, $obj->name);
-			$query->execute();
-			$res = $query->get_result();
+			$result = $this->condb->query("INSERT INTO invoices (category,name) VALUES (?, ?)");
 			$last_id = $this->condb->insert_id;
-			$query->close();
 			$this->close_db();
-			return $last_id;
+			if($result) {
+			    return $last_id;
+			}
 		} catch (Exception $e) {
 			$this->close_db();
 			throw $e;
@@ -58,13 +56,12 @@ class InvoiceModel
 	{
 		try {
 			$this->open_db();
-			$query = $this->condb->prepare("UPDATE invoices SET category=?,name=? WHERE id=?");
-			$query->bind_param("ssi", $obj->category, $obj->name, $obj->id);
-			$query->execute();
-			$res = $query->get_result();
-			$query->close();
+			$result = $this->condb->query("UPDATE invoices SET category=?,name=? WHERE id=?");
 			$this->close_db();
-			return true;
+			if($result) {
+			    return true;
+			}
+			return false;
 		} catch (Exception $e) {
 			$this->close_db();
 			throw $e;
@@ -75,13 +72,12 @@ class InvoiceModel
 	{
 		try {
 			$this->open_db();
-			$query = $this->condb->prepare("DELETE FROM invoices WHERE id=?");
-			$query->bind_param("i", $id);
-			$query->execute();
-			$res = $query->get_result();
-			$query->close();
+			$result = $this->condb->query("DELETE FROM invoices WHERE id=$id");
 			$this->close_db();
-			return true;
+			if($result) {
+			    return true;
+			}
+			return false;
 		} catch (Exception $e) {
 			$this->closeDb();
 			throw $e;
@@ -93,17 +89,12 @@ class InvoiceModel
 		try {
 			$this->open_db();
 			if ($id > 0) {
-				$query = $this->condb->prepare("SELECT * FROM invoices WHERE id=?");
-				$query->bind_param("i", $id);
+				$result = $this->condb->query("SELECT * FROM invoices WHERE id=$id");
 			} else {
-				$query = $this->condb->prepare("SELECT * FROM invoices");
+				$result = $this->condb->query("SELECT * FROM invoices");
 			}
-
-			$query->execute();
-			$res = $query->get_result();
-			$query->close();
 			$this->close_db();
-			return $res;
+			return $result;
 		} catch (Exception $e) {
 			$this->close_db();
 			throw $e;

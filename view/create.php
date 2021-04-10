@@ -15,7 +15,8 @@
             width: 500px;
             margin: 0 auto;
         }
-        .mx-datepicker{
+
+        .mx-datepicker {
             width: 100% !important;
         }
     </style>
@@ -29,7 +30,7 @@
                     <h2>Add Invoice</h2>
                 </div>
                 <p>Please fill this form and submit to add invoice record in the database.</p>
-                <form action="<?php echo BASE_URL; ?>store" method="post">
+                <form action="<?php echo BASE_URL; ?>store" method="post" @submit.prevent="store">
                     <div class="row">
                         <div class="col-sm-12 col-md-8">
                             <div class="form-group">
@@ -51,7 +52,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Date</label>
-                                <date-picker v-model="form.date"></date-picker>
+                                <date-picker :format="'DD-MM-YYYY'" v-model="form.date"></date-picker>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -117,7 +118,7 @@
                                 <label for="">Record On.</label>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <date-picker v-model="form.records[index].record_date"></date-picker>
+                                        <date-picker :format="'DD-MM-YYYY'" v-model="form.records[index].record_date"></date-picker>
                                     </div>
                                     <div class="col-md-6">
                                         <input type="text" v-model="form.records[index].record_amount" @keyup="calculateOverallBalance" class="form-control" placeholder="Record Amount">
@@ -161,9 +162,12 @@
                                 </table>
                             </div>
                         </div>
+                        <div class="col-md-12 text-right">
+                            <input type="submit" name="addbtn" class="btn btn-primary" value="Submit">
+                            <a href="<?php echo BASE_URL; ?>" class="btn btn-default">Cancel</a>
+                        </div>
                     </div>
-                    <input type="submit" name="addbtn" class="btn btn-primary" value="Submit">
-                    <a href="<?php echo BASE_URL; ?>" class="btn btn-default">Cancel</a>
+
                 </form>
             </div>
         </div>
@@ -180,7 +184,7 @@
                     form: {
                         customer_id: '',
                         items: [],
-                        date: new Date,
+                        date: '',
                         invoice_id: '',
                         city: '',
                         records: [],
@@ -202,7 +206,7 @@
             methods: {
                 showCity: function() {
                     const customer_id = this.form.customer_id;
-                    const customer = this.customers.find(function (row) {
+                    const customer = this.customers.find(function(row) {
                         return row.id === customer_id;
                     });
                     this.form.city = customer ? customer.city : '';
@@ -229,14 +233,14 @@
                         net_amount: ''
                     });
                 },
-                addNewRecordRow: function () {
+                addNewRecordRow: function() {
                     const newRow = {
-                        record_date: new Date(),
+                        record_date: '',
                         record_amount: '',
                     };
                     this.form.records.push(newRow);
                 },
-                calculateDiscount: function (flag) {
+                calculateDiscount: function(flag) {
                     let discount = 0;
                     const net_total_amount = isNaN(parseFloat(this.total_net_amount)) ? 0 : parseFloat(this.total_net_amount);
                     if (flag === 0) {
@@ -244,7 +248,7 @@
                         const ratio = rate / 100;
                         discount = ratio * net_total_amount;
                         this.form.discount = discount.toFixed(2);
-                    }else {
+                    } else {
                         discount = this.form.discount;
                         this.form.discount_percent = '';
                     }
@@ -252,12 +256,12 @@
                     this.calculateGrandTotal();
                     this.calculateFinalBalance();
                 },
-                calculateNetTotalAfterDiscount: function () {
+                calculateNetTotalAfterDiscount: function() {
                     const discount = isNaN(parseFloat(this.form.discount)) ? 0 : parseFloat(this.form.discount);
                     const net_total_amount = isNaN(parseFloat(this.total_net_amount)) ? 0 : parseFloat(this.total_net_amount);
                     this.grand_total_after_discount = this.grand_total = net_total_amount - discount;
                 },
-                calculateVAT: function (flag) {
+                calculateVAT: function(flag) {
                     let vat = 0;
                     const grand_total_after_discount = isNaN(parseFloat(this.grand_total_after_discount)) ? 0 : parseFloat(this.grand_total_after_discount);
                     if (flag === 0) {
@@ -271,21 +275,21 @@
                     this.calculateGrandTotal();
                     this.calculateFinalBalance();
                 },
-                calculateGrandTotal: function () {
+                calculateGrandTotal: function() {
                     const vat = isNaN(parseFloat(this.form.vat)) ? 0 : parseFloat(this.form.vat);
                     const grand_total_after_discount = isNaN(parseFloat(this.grand_total_after_discount)) ? 0 : parseFloat(this.grand_total_after_discount);
                     this.grand_total = grand_total_after_discount + vat;
                 },
-                calculateOverallBalance: function () {
+                calculateOverallBalance: function() {
                     let last_balance = isNaN(parseFloat(this.last_balance)) ? 0 : parseFloat(this.last_balance);
-                    let total_record_amount = this.form.records.reduce(function (sum, row) {
+                    let total_record_amount = this.form.records.reduce(function(sum, row) {
                         return isNaN(parseFloat(row.record_amount)) ? sum : sum + parseFloat(row.record_amount);
                     }, 0)
                     const prev_balance = last_balance - total_record_amount;
                     this.prev_balance = prev_balance.toFixed(2);
                     this.calculateFinalBalance();
                 },
-                calculateFinalBalance: function () {
+                calculateFinalBalance: function() {
                     let prev_balance = isNaN(parseFloat(this.prev_balance)) ? 0 : parseFloat(this.prev_balance);
                     let grand_total = isNaN(parseFloat(this.grand_total)) ? 0 : parseFloat(this.grand_total);
                     let final_balance = grand_total + prev_balance;
@@ -307,16 +311,65 @@
                     }
                 },
                 calculateTotalQuantity: function() {
-                    const total_quantity = this.form.items.reduce(function (sum, row) {
+                    const total_quantity = this.form.items.reduce(function(sum, row) {
                         return isNaN(parseFloat(row.quantity)) ? sum : sum + parseFloat(row.quantity);
                     }, 0);
                     this.total_quantity = parseFloat(total_quantity).toFixed(2)
                 },
                 calculateTotalNetAmount: function() {
-                    const total_net_amount = this.form.items.reduce(function (sum, row) {
+                    const total_net_amount = this.form.items.reduce(function(sum, row) {
                         return isNaN(parseFloat(row.net_amount)) ? sum : sum + parseFloat(row.net_amount);
                     }, 0);
                     this.total_net_amount = parseFloat(total_net_amount).toFixed(2)
+                },
+                formatDate: function(date) {
+                    var d = new Date(date),
+                        month = '' + (d.getMonth() + 1),
+                        day = '' + d.getDate(),
+                        year = d.getFullYear();
+
+                    if (month.length < 2)
+                        month = '0' + month;
+                    if (day.length < 2)
+                        day = '0' + day;
+
+                    return [year, month, day].join('-');
+                },
+                store: function() {
+                    let customer_id = this.form.customer_id;
+                    let date = this.formatDate(this.form.date);
+                    let last_balance = this.last_balance;
+                    let discount = this.form.discount;
+                    let vat = this.form.vat;
+                    let grand_total = this.grand_total;
+                    let final_balance = this.final_balance;
+
+                    let self = this;
+                    this.form.records.forEach(function(record, key) {
+                        self.form.records[key].record_date = self.formatDate(record.record_date);
+                    });
+
+                    let items = JSON.stringify(this.form.items)
+                    let records = JSON.stringify(this.form.records)
+
+                    $.ajax({
+                        url: '<?php echo BASE_URL; ?>store',
+                        type: 'post',
+                        data: {
+                            customer_id: customer_id,
+                            date: date,
+                            last_balance: last_balance,
+                            discount: discount,
+                            vat: vat,
+                            grand_total: grand_total,
+                            final_balance: final_balance,
+                            items: items,
+                            records: records,
+                        },
+                        success: function(response) {
+                            console.log(response)
+                        }
+                    })
                 }
             },
             created() {

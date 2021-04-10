@@ -8,24 +8,6 @@ session_status() === PHP_SESSION_ACTIVE ? TRUE : session_start();
 
 class InvoiceController extends Controller
 {
-    // mvc handler request
-    public function mvcHandler()
-    {
-        $act = isset($_GET['act']) ? $_GET['act'] : NULL;
-        switch ($act) {
-            case 'add':
-                $this->insert();
-                break;
-            case 'update':
-                $this->update();
-                break;
-            case 'delete':
-                $this->delete();
-                break;
-            default:
-                $this->index();
-        }
-    }
     // check validation
     public function checkValidation($invoice)
     {
@@ -53,28 +35,38 @@ class InvoiceController extends Controller
         return $noerror;
     }
     // add new record
-    public function insert()
+    public function store()
     {
         try {
             $invoice = new Invoice();
-            if (isset($_POST['addbtn'])) {
-                // read form value
-                $invoice->category = trim($_POST['category']);
-                $invoice->name = trim($_POST['name']);
-                //call validation
-                $chk = $this->checkValidation($invoice);
-                if ($chk) {
-                    //call insert record            
-                    $pid = $this->objsm->insertRecord($invoice);
-                    if ($pid > 0) {
-                        $this->index();
-                    } else {
-                        echo "Somthing is wrong..., try again.";
-                    }
+            // read form value
+            $invoice->category_id = trim($_POST['category_id']);
+            $invoice->date = trim($_POST['date']);
+            $invoice->discount = trim($_POST['discount']);
+            $invoice->vat = trim($_POST['vat']);
+            $invoice->last_balance = trim($_POST['last_balance']);
+            $invoice->grand_total = trim($_POST['grand_total']);
+            $invoice->final_balance = trim($_POST['final_balance']);
+            $invoice->items = trim($_POST['items']);
+            $invoice->records = trim($_POST['records']);
+
+            echo '<pre>';
+            print_r($_POST);
+            echo '</pre>';
+
+            //call validation
+            $chk = $this->checkValidation($invoice);
+            if ($chk) {
+                //call insert record            
+                $pid = $this->objsm->insertRecord($invoice);
+                if ($pid > 0) {
+                    $this->index();
                 } else {
-                    $_SESSION['invoicel0'] = serialize($invoice); //add session obj           
-                    $this->pageRedirect("view/insert.php");
+                    echo "Somthing is wrong..., try again.";
                 }
+            } else {
+                $_SESSION['invoicel0'] = serialize($invoice); //add session obj           
+                // $this->pageRedirect("view/insert.php");
             }
         } catch (Exception $e) {
             throw $e;

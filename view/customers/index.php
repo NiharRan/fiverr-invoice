@@ -40,7 +40,7 @@
                     <a href="<?php echo BASE_URL; ?>customers/create" class="btn btn-success pull-right">Add New Customer</a>
                 </div>
                 <?php
-                if ($result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
                     echo "<table class='table table-bordered table-striped'>";
                     echo "<thead>";
                     echo "<tr>";
@@ -55,7 +55,7 @@
                     echo "</tr>";
                     echo "</thead>";
                     echo "<tbody>";
-                    while ($row = mysqli_fetch_array($result)) {
+                    while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
                         echo "<tr>";
                         echo "<td>" . $row['id'] . "</td>";
                         echo "<td>" . $row['name'] . "</td>";

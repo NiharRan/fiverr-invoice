@@ -5,15 +5,14 @@ class Invoice
     // table fields
     public $id;
     public $customer_id;
-    public $amount;
-    // message string
+    public $date;
     public $discount;
     public $vat;
-    public $net_amount;
-    public $dispatched_per;
-    public $remark;
-    public $invoice_date;
-    public $created_at;
+    public $last_balance;
+    public $grand_total;
+    public $final_balance;
+    public $items;
+    public $records;
     // constructor set default value
     function __construct()
     {

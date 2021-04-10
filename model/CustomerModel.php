@@ -39,10 +39,13 @@ class CustomerModel
 	{
 		try {
 			$this->open_db();
-			$this->condb->query("INSERT INTO customers (name,phone,email,address,city,created_at) VALUES ('$obj->name', '$obj->phone', '$obj->email', '$obj->address', '$obj->city', '$obj->created_at')");
+			$result = $this->condb->query("INSERT INTO customers (name,phone,email,address,city,created_at) VALUES ('$obj->name', '$obj->phone', '$obj->email', '$obj->address', '$obj->city', '$obj->created_at')");
 			$last_id = $this->condb->insert_id;
 			$this->close_db();
-			return $last_id;
+			if($result) {
+			    return $last_id;
+			}
+			return false;
 		} catch (Exception $e) {
 			$this->close_db();
 			throw $e;
@@ -53,9 +56,12 @@ class CustomerModel
 	{
 		try {
 			$this->open_db();
-			$query = $this->condb->query("UPDATE customers SET name='$obj->name',phone='$obj->phone',email='$obj->email',address='$obj->address',city='$obj->city' WHERE id=$obj->id");
+			$result = $this->condb->query("UPDATE customers SET name='$obj->name',phone='$obj->phone',email='$obj->email',address='$obj->address',city='$obj->city' WHERE id=$obj->id");
 			$this->close_db();
-			return true;
+			if($result) {
+			    return true;
+			}
+			return false;
 		} catch (Exception $e) {
 			$this->close_db();
 			throw $e;
@@ -66,13 +72,12 @@ class CustomerModel
 	{
 		try {
 			$this->open_db();
-			$query = $this->condb->prepare("DELETE FROM customers WHERE id=?");
-			$query->bind_param("i", $id);
-			$query->execute();
-			$res = $query->get_result();
-			$query->close();
+			$result = $this->condb->query("DELETE FROM customers WHERE id=$id");
 			$this->close_db();
-			return true;
+			if($result) {
+			    return true;
+			}
+			return false;
 		} catch (Exception $e) {
 			$this->closeDb();
 			throw $e;
@@ -81,23 +86,14 @@ class CustomerModel
 	// select record     
 	public function selectRecord($id)
 	{
-		try {
-			$this->open_db();
+		$this->open_db();
 			if ($id > 0) {
-				$query = $this->condb->prepare("SELECT * FROM customers WHERE id=?");
-				$query->bind_param("i", $id);
+				$result = $this->condb->query("SELECT * FROM customers WHERE id=$id");
 			} else {
-				$query = $this->condb->prepare("SELECT * FROM customers");
+				$result = $this->condb->query("SELECT * FROM customers");
 			}
-
-			$query->execute();
-			$res = $query->get_result();
-			$query->close();
+            
 			$this->close_db();
-			return $res;
-		} catch (Exception $e) {
-			$this->close_db();
-			throw $e;
-		}
+			return $result;
 	}
 }

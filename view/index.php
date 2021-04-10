@@ -37,7 +37,7 @@
                         <a href="<?php echo BASE_URL; ?>create" class="btn btn-success pull-right">Add New Invoice</a>
                     </div>
                     <?php
-                        if($result->num_rows > 0){
+                        if($result && $result->num_rows > 0){
                             echo "<table class='table table-bordered table-striped'>";
                                 echo "<thead>";
                                     echo "<tr>";
@@ -48,7 +48,7 @@
                                     echo "</tr>";
                                 echo "</thead>";
                                 echo "<tbody>";
-                                while($row = mysqli_fetch_array($result)){
+                                while($row = $result->fetch_array(MYSQLI_ASSOC)){
                                     echo "<tr>";
                                         echo "<td>" . $row['id'] . "</td>";                                        
                                         echo "<td>" . $row['category'] . "</td>";
@@ -61,8 +61,6 @@
                                 }
                                 echo "</tbody>";                            
                             echo "</table>";
-                            // Free result set
-                            mysqli_free_result($result);
                         } else{
                             echo "<p class='lead'><em>No records were found.</em></p>";
                         }
